@@ -9,7 +9,6 @@ import (
 type User struct{
     Id int64
     Name string
-    Version int `xorm:"version"`
 }
 
 var engine *xorm.Engine
@@ -32,5 +31,19 @@ func CreateAccount(name string)error{
 }
 
 func UpdateAccount(name string,id int64)error{
-    
+    user:=new(User)
+    user.Name=name
+    _,err:=engine.Id(id).Update(user)
+    return err  
 }
+
+func DeleteAccount(id int64)error{
+    user:=new(User)
+    _,err:=engine.Id(id).Delete(user)
+    return err
+}
+
+// func ListAccount()(list []User,err error){
+//     list,err:=engine.Find(&User)
+//     return list,err
+// }
