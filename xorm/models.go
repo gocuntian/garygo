@@ -43,7 +43,7 @@ func DeleteAccount(id int64)error{
     return err
 }
 
-// func ListAccount()(list []User,err error){
-//     list,err:=engine.Find(&User)
-//     return list,err
-// }
+func ListAccount()(list []User,err error){
+    err=engine.Desc("id").Find(&list)
+    return list,err
+}

@@ -8,8 +8,9 @@ import (
 
 func main(){
     m:=macaron.Classic()
+    m.Use(macaron.Renderer())
     m.Get("/add/:username",AddHandler)
-   // m.Get("/list",ListHandler)
+    m.Get("/list",ListHandler)
     m.Get("/update/:id/:name",UpdateHandler)
     m.Get("/delete/:id",DeleteHandler)
     m.Run()
@@ -28,16 +29,11 @@ func AddHandler(ctx *macaron.Context) string{
     }
 }
 
-// func ListHandler()string{
-//    _,err:=ListAccount()
-//    if err!=nil{
-//        return "select data fail"
-//    }
-//    return "ok"
-// //    for i,one:=range list{
-// //       return fmt.Sprintf("%d %#v\n",i+1,one)
-// //    }
-// }
+func ListHandler(ctx *macaron.Context){
+ list,_:=ListAccount()
+ ctx.Data["List"]=list
+ ctx.HTML(200,"list")
+}
 
 func UpdateHandler(ctx *macaron.Context) string{
     id:=ctx.Params(":id")
