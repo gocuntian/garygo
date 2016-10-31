@@ -1,0 +1,28 @@
+<html>
+
+<head>
+    <title>Info</title>
+</head>
+
+<body>
+    <div class="container">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {{with .Info}}
+                    <td>{{.Id}}</td>
+                    <td>{{.Name}}</td>
+                    {{end}}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
