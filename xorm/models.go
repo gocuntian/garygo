@@ -11,6 +11,12 @@ type User struct{
     Id int64
     Name string
 }
+type Contact struct{
+    Name string `form:"name" binding:"Required"`
+    Email string `form:"email"`
+    Message string `form:"message" binding:"Required"`
+    MailingAddress string `form:"mailing_address"`
+}
 
 var engine *xorm.Engine
 
@@ -20,10 +26,15 @@ func init(){
     if err!=nil{
         log.Fatalf("fail to create engine:%v\n",err)
     }
-    err=engine.Sync2(new(User))
+    err=engine.Sync2(new(User),new(Contact))
     if err!=nil{
         log.Fatalf("fail to sync data:$v\n",err)
     }
+}
+
+func CreateContact(contact Contact)error{
+    _,err:=engine.Insert(contact)
+    return err
 }
 
 func CreateAccount(name string)error{

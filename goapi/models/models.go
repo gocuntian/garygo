@@ -16,7 +16,7 @@ var (
     } 
 )
 func init(){
-    tables = append(tables,new(User))
+    tables = append(tables,new(User),new(Contact))
 }
 
 func LoadModelsConfig(){
@@ -41,6 +41,7 @@ func getEngine()(*xorm.Engine,error){
 }
 
 func NewEngine()(err error){
+    //x,err:=getEngine() //this is error
     x,err:=getEngine()
     if err!=nil{
         return fmt.Errorf("models.init(fail to connect to database):%v",err)

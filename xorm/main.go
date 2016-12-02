@@ -4,6 +4,7 @@ import (
    // "fmt"
     "strconv"
     "gopkg.in/macaron.v1"
+    "github.com/xingcuntian/binding"
 )
 
 func main(){
@@ -14,7 +15,28 @@ func main(){
     m.Get("/info/:id",InfoHandler)
     m.Get("/update/:id/:name",UpdateHandler)
     m.Get("/delete/:id",DeleteHandler)
+    m.Get("/contact/create",CreateHandler)
+    // m.Post("/contact/submit",binding.Bind(Contact{}),func(contact Contact)string{
+    //     return fmt.Sprintf("Name:%s\n Email:%s\n Message:%s\n Mailing Address:%v",
+    //     contact.Name,contact.Email,contact.Message,contact.MailingAddress)
+    // })
+    m.Post("/contact/submit",binding.Bind(Contact{}),AddContactHandler)
     m.Run()
+}
+
+
+func AddContactHandler(contact Contact) string{
+    err:=CreateContact(contact)
+    if err!=nil{
+        return "create contact fail"
+    }else{
+        return "create contact success"
+    }
+
+}
+
+func CreateHandler(ctx *macaron.Context){
+    ctx.HTML(200,"create")
 }
 
 func AddHandler(ctx *macaron.Context) string{
