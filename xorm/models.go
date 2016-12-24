@@ -28,7 +28,7 @@ func init(){
     }
     err=engine.Sync2(new(User),new(Contact))
     if err!=nil{
-        log.Fatalf("fail to sync data:$v\n",err)
+        log.Fatalf("fail to sync data:%v\n",err)
     }
 }
 
