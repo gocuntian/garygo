@@ -16,6 +16,7 @@ type Member struct{
     Passwd string `xorm:"varchar(200)"`
     Created time.Time `xorm:"created"`
     Updated time.Time `xorm:"updated"`
+    Version int64 `xorm:"version"`
 }
 
 var engine *xorm.Engine
