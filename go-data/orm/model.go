@@ -19,6 +19,35 @@ type Member struct{
     Version int64 `xorm:"version"`
 }
 
+type Group struct{
+    Id int64
+    Name string
+}
+
+type User struct{
+    Id int64
+    Name string
+    GroupId int64 `xorm:"index"`
+}
+
+// 1)
+// type UserGroup struct{
+//     User `xorm:"extends"`
+//     Name string
+// }
+//[{{1 test1 1} group1} {{2 test2 2} group2}]
+
+type UserGroup struct{
+    User `xorm:"extends"`
+    Group `xorm:"extends"`
+}
+//[{{1 test1 1} {1 group1}} {{2 test2 2} {2 group2}}]
+
+
+
+func (UserGroup) TableName()string{
+    return "prefix_user"
+}
 var engine *xorm.Engine
 
 func init(){
@@ -35,7 +64,7 @@ func init(){
         // tbMapper:=core.NewSuffixMapper(core.SnakeMapper{},"_suffix")
         // engine.SetTableMapper(tbMapper)
         //同步表结构
-        err=engine.Sync2(new(Member))
+        err=engine.Sync2(new(Member),new(User),new(Group))
         if err!=nil{
             log.Fatalf("fail to sync data:%v\n",err)
         }

@@ -291,6 +291,22 @@ func main(){
         // }
         // fmt.Println(members)
 
+        // Join用法
+
+        users:=make([]UserGroup,0)
+        err:=engine.Join("INNER","prefix_group","prefix_group.id = prefix_user.group_id").Find(&users)
+        if err!=nil{
+            fmt.Println(err)
+        }
+        fmt.Println(users)
+
+        // users:=make([]UserGroup,0)
+        // err:=engine.Sql("select prefix_user.*,prefix_group.name from prefix_user,prefix_group where prefix_user.group_id=prefix_group.id").Find(&users)
+        // if err!=nil{
+        //     fmt.Println(err)
+        // }
+        // fmt.Println(users)
+
 
 
 
