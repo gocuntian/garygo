@@ -293,12 +293,12 @@ func main(){
 
         // Join用法
 
-        users:=make([]UserGroup,0)
-        err:=engine.Join("INNER","prefix_group","prefix_group.id = prefix_user.group_id").Find(&users)
-        if err!=nil{
-            fmt.Println(err)
-        }
-        fmt.Println(users)
+        // users:=make([]UserGroup,0)
+        // err:=engine.Join("INNER","prefix_group","prefix_group.id = prefix_user.group_id").Find(&users)
+        // if err!=nil{
+        //     fmt.Println(err)
+        // }
+        // fmt.Println(users)
 
         // users:=make([]UserGroup,0)
         // err:=engine.Sql("select prefix_user.*,prefix_group.name from prefix_user,prefix_group where prefix_user.group_id=prefix_group.id").Find(&users)
@@ -306,6 +306,36 @@ func main(){
         //     fmt.Println(err)
         // }
         // fmt.Println(users)
+
+
+        // users:=make([]UserGroupType,0)
+        // err:=engine.Table("prefix_user").Join("INNER","prefix_group","prefix_group.id=prefix_user.group_id").Join("INNER","prefix_type","prefix_type.id=prefix_user.type_id").Find(&users)
+        // if err!=nil{
+        //     fmt.Println(err)
+        // }
+        // fmt.Println(users)
+
+        // Where and like 使用
+        // users:=make([]UserGroupType,0)
+        // err:=engine.Table("prefix_user").Join("INNER","prefix_group","prefix_group.id = prefix_user.group_id").Join("INNER","prefix_type","prefix_type.id = prefix_user.type_id").Where("prefix_user.name like ?","%gary%").Find(&users)
+        // if err!=nil{
+        //     fmt.Println(err)
+        // }
+        // fmt.Println(users)
+
+        //Iterate方法
+        //terate方法提供逐条执行查询到的记录的方法，他所能使用的条件和Find方法完全相同
+        err:=engine.Where("age > ? or salt=?",0,"test").Iterate(new(Member),func(i int,bean interface{})error{
+            member:=bean.(*Member)
+            fmt.Println(member)
+           return nil
+        })
+        if err!=nil{
+            fmt.Println(err)
+        }
+       // fmt.Println(member)
+        
+
 
 
 
