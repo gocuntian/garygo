@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package stackcalc;
+
+service StackCalc {
+
+  // Create a Calc instance and return its ID
+  rpc CreateCalc (CreateCalcRequest) returns (CreateCalcResponse) {}
+
+  // Destroy the specified Calc instance
+  rpc DestroyCalc (DestroyCalcRequest) returns (DestroyCalcResponse) {}
+
+  // Lists existing Calc instances
+  rpc ListCalcs (ListCalcsRequest) returns (ListCalcsResponse) {}
+
+  // Evaluates the specified statement and returns the state of the Calc after the
+  // evaluation.  If an error occurs then that is returned as well
+  rpc EvaluateStatement (EvaluateStatementRequest) returns (EvaluateStatementResponse) {}
+
+  // Returns the state of the specified Calc
+  rpc GetState (GetStateRequest) returns (GetStateResponse) {}
+
+  rpc Interact (stream EvaluateStatementRequest) returns (stream EvaluateStatementResponse) {}
+}
+
+message CreateCalcRequest {
+  uint32 stack_depth = 1;
+}
+
+message CreateCalcResponse {
+  string calc_id = 1;
+}
+
+message DestroyCalcRequest {
+  string calc_id = 1;
+}
+
+message DestroyCalcResponse {
+  // Currently no fields are returned
+}
+
+message ListCalcsRequest {
+  uint32 limit = 1;
+}
+
+message ListCalcsResponse {
+  repeated string calc_ids = 1;
+}
+
+message EvaluateStatementRequest {
+  string calc_id = 1;
+  Statement statement = 2;
+}
+
+message EvaluateStatementResponse {
+  State state = 1;
+  CalculationError err = 2;
+}
+
+message GetStateRequest {
+  string calc_id = 1;
+}
+
+message GetStateResponse {
+  State state = 1;
+}
+
+message Statement {
+  repeated Token tokens = 1;
+
+  message Token {
+    enum Operator {
+      VAL = 0;
+      ADD = 1;
+      SUBTRACT = 2;
+      MULTIPLY = 3;
+      DIVIDE = 4;
+      DROP = 7;
+    }
+
+    Operator op = 1;
+    sint64 val = 2;
+  }
+}
+
+message State {
+  uint32 stack_depth = 1;
+  repeated sint64 vals = 2;
+}
+
+enum CalculationError {
+  NO_ERROR = 0;
+  STACK_UNDERFLOW = 1;
+  STACK_OVERFLOW = 2;
+  DIVIDE_BY_ZERO = 3;
+}
