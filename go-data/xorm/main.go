@@ -138,7 +138,8 @@ func main(){
         // fmt.Println(members)
 
         // member:=new(Member)
-        // member.Name="john"
+        // 
+        
         // affected,err:=engine.Id(44).Update(member)
         // if err!=nil{
         //   fmt.Println(err)
@@ -325,15 +326,45 @@ func main(){
 
         //Iterate方法
         //terate方法提供逐条执行查询到的记录的方法，他所能使用的条件和Find方法完全相同
-        err:=engine.Where("age > ? or salt=?",0,"test").Iterate(new(Member),func(i int,bean interface{})error{
-            member:=bean.(*Member)
-            fmt.Println(member)
-           return nil
-        })
-        if err!=nil{
-            fmt.Println(err)
-        }
+        // err:=engine.Where("age > ? or salt=?",0,"test").Iterate(new(Member),func(i int,bean interface{})error{
+        //     member:=bean.(*Member)
+        //     fmt.Println(member)
+        //    return nil
+        // })
+        // if err!=nil{
+        //     fmt.Println(err)
+        // }
        // fmt.Println(member)
+
+    //    user:=new(Member)
+    //    rows,err:=engine.Where("id > ?",1).Rows(user)
+    //    if err!=nil{
+    //        fmt.Println(err)
+    //        return
+    //    }
+    //    defer rows.Close()
+    //    for rows.Next(){
+    //        err=rows.Scan(user)
+    //        if err!=nil{
+    //            fmt.Println(err)
+    //        }
+    //        fmt.Println(*user)
+    //    }
+
+    // var member Member
+    // has,err:=engine.Id(1).Get(&member)
+    // if err!=nil{
+    //     fmt.Println(err)
+    // }
+    // fmt.Println(has)
+    // fmt.Println(member)
+    
+    // affected,err:= engine.Id(1).Update(&Member{Salt:"xingcuntian23",Version:2})
+    // if err!=nil{
+    //     fmt.Println(err)
+    // }
+    // fmt.Println(affected)
+       
         
 
 
