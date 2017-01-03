@@ -1,0 +1,7 @@
+.env*
+*-compose*.yml
+*.md
+Dockerfile*
+*.swp
+.git
+*.example
