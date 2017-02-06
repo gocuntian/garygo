@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.helloworld";
+option java_outer_classname = "HelloWorldProto";
+
+package helloworld;
+
+// The greeting service definition.
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  int64  id= 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+    int64 id = 1;
+    string username = 2;
+    string avatar = 3;
+    int64 company_id = 4;
+}
