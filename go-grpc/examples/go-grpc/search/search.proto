@@ -1,0 +1,19 @@
+syntax = "proto3";
+package search;
+
+service Google{
+    rpc Search(Request) returns (Result) {}
+    rpc Watch(Request) returns (stream Result) {}
+}
+
+message Request{
+    string query = 1;
+}
+
+message Result{
+    int64 id = 1;
+    string username = 2;
+    string avatar = 3;
+    int64 company_id = 4;
+}
+

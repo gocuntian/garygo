@@ -1,0 +1,10 @@
+<h1>Todos</h1>
+<ul>
+    {{range .Todos}}
+       {{if .Done}}
+          <li>{{.Task}}</li>
+        {{else}}
+          <li>{{.Task}}</li>
+        {{end}}
+    {{end}}
+</ul>

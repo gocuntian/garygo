@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"io"
 	// "os"
 	"fmt"
 	"golang.org/x/net/context"
@@ -12,6 +13,23 @@ import (
 const (
 	address     = "localhost:50051"
 )
+
+func getCustomers(client pb.GreeterClient, filter *pb.CustomerFilter){
+	stream, err :=client.GetCustomers(context.Background(),filter);
+	if err!=nil{
+		log.Fatalf("Error on get customers:%v",err)
+	}
+	for {
+		customer, err :=stream.Recv()
+		if err == io.EOF{
+			break
+		}
+		if err != nil{
+			log.Fatalf("%v.GetCustomers(_) = _, %v", client, err)
+		}
+		log.Printf("Customer: %v",customer)
+	}
+}
 
 func main() {
 	
@@ -30,4 +48,9 @@ func main() {
 	}
 	fmt.Println(r)
 	//log.Printf("Greeting: %s", r.Message)
+
+   
+	// Filter with an empty Keyword
+	filter := &pb.CustomerFilter{Keyword: ""}
+	getCustomers(c, filter)
 }
