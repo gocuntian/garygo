@@ -137,3 +137,162 @@ type mcentral struct {
     页所属的span指针区	 GC标记位图	         用户内存分配区域
     spans 512MB	      bitmap 32MB      	arena 512GB
     spans_mapped	  bitmap_mapped	    area_start	area_used	area_end
+
+优化内存申请的方法--临时对象
+带垃圾回收的语言， 虽然对于刚刚上手的程序员是友好的， 但是后期随着项目变得越来越巨大， 维护的内存问题也会逐渐暴露出来。 今天讲一种优化内存申请的方法--临时对象池。
+
+在高并发的情况下， 如果每次请求都需要申请一块用于计算的内存， 比如：
+    m := make([]int64, len(ids))
+将会是一件成本很高的事， 为了定位项目中的慢语句， 我曾经采用"二分法”的方式打印语句， 定位程序变慢的代码位置。 它并不是每次都慢， 而是每过几秒钟就突然变得极其慢， TPS能从2000降到200。 引起这个问题就是类似于上面这条语句。 初始化一个slice, 初学者会用:
+     m := make([]int64, 0)
+高级一些的程序员都会知道， 这样第一次分配内存相当于没有分配， 如果要后续append元素， 会引起slice以指数形式扩充， 可以参考下面的代码，追加了3个元素， slice扩容了3次。
+    a := make([]int64,  0)
+    fmt.Println("cap=", cap(a), "len=", len(a))
+
+    for i:=0; i<3; i++ {
+        a = append(a, 1)
+        fmt.Println("cap=", cap(a), "len=", len(a))
+    }
+
+cap= 0 len= 0  
+cap= 1 len= 1  
+cap= 2 len= 2  
+cap= 4 len= 3  
+每一次扩容空间， 都是会重新申请一块区域， 把就空间里面的元素复制进来， 把新的追加进来。 那旧空间里面的元素怎么办？ 等着垃圾回收呗。 简单的优化方式， 就是给自己要用的slice 提前申请好空间，类似于最开头的那行代码。
+    make([]int64, 0, len(ids))
+这样做了避免了多次扩容申请内存， 但还是有问题的。
+堆还是栈？
+程序会从操作系统申请一块内存， 而这块内存也会被分成堆和栈。 栈可以简单的理解成一次函数调用内部申请到的内存， 它们会随着函数的返回把内存还给系统。
+    func F() {
+        temp := make([]int, 0, 20)
+        ...
+    }
+而上面这段代码， 申请的代码一模一样， 但是申请后作为返回值返回了， 编计器会认为变量之后还会被使用，当函数返回之后并不会将其内存归还， 那它就会被申请到堆上面了。 申请到堆上面的内存才会引起垃圾回收。
+
+那么考考大家， 下面这三种情况怎么解释呢？
+func F() {  
+    a := make([]int, 0, 20)
+    b := make([]int, 0, 20000)
+
+    l := 20
+    c := make([]int, 0, len(l))
+}
+a 和 b的代码一样，就是申请的空间不一样大， 但是它们两个的命运是截然相反的。 a前面已经介绍过了， 会申请到栈上， 而b由于申请内存较大， 编译器会把这种申请内存较大（>32KB）的变量转移到堆上面。 即使是临时变量， 申请过大也会在堆上面申请. 而c， 对我们而言， 其含义和a是一致的， 但是编译器对于这种不定长度的申请方式， 也会在堆上面申请， 即使申请的长度很短。
+
+可以通过下面的命令查看变量申请的位置。 详细内容可以参考我之前的文章《【译】优化Go的模式》
+    go build -gcflags="-m" . 2>&1
+内存碎片化
+实际项目基本都是通过c := make([]int, 0, l) 来申请内存， 长度都是不确定的。 自然而然这睦变量都会申请到堆上面了。 Golang使用的垃圾回收算法是【标记--清除】。 简单的说， 就是程序要从操作系统申请一块比较大的内存， 内存分成小块， 通过链表链接。 每次程序申请内存，就从链表上面遍历每一小块， 找到符合的就返回其地址， 没有合适的就从操作系统申请。 如果申请内存次数较我， 而且申请的大小不固定， 就会引起碎片化的问题。 申请的堆内存并没有用完， 但是用户申请的内存的时候却没有合适的空间提供。 这样会遍历整个链表， 还会继续向操作系统申请内存。 这样就能解释我一开始描述的问题， 申请一块内存变成了慢语句。
+临时对象池
+如何解决这个问题， 首先想到的就是对象池。 Golang 在sync 里面提供了对象池Pool。 一般大家都叫这个为对象池， 而我喜欢叫它临时对象池。 因为每次垃圾回收会把池子里面不被引用的对象回收掉。
+func(p *Pool) Get() interface{}  
+Get selects an arbitrary item from the Pool, removes it from the Pool, and >  
+returns it to the caller. Get may choose to ignore the pool and treat it as  
+empty. Callers should not assume any relation between values passed to Put and  
+the values returned by Get.  
+需要注意的是， Get方法会把返回的对象从池子里面删除。 所以用完了的对象， 还是得重新放回池子。 很快， 我写出了第一版对象池优化方案:
+var idsPool = sync.Pool {  
+    New: func() interface{} {
+        ids := make([]int64, 0, 20000)
+        return &ids
+    },
+}
+
+func NewIds() []int64 {  
+    ids := idsPool.Get().(*[]int64) 
+    *ids = (*ids)[:0]
+    idsPool.Put(ids)
+    return *ids
+}
+这样的实现， 是把所有的slice都放到同一个池子里面了。 为了应对变长的问题， 都是按照一个较大的值申请的变量。 虽然是一种优化， 但是使用超大的slice计算， 性能并没有怎么提升。 紧接着参考了达达大神的代码sync_pool.go， 又写了一版:
+var DEFAULT_SYNC_POOL *SyncPool
+
+func NewPool() *SyncPool {  
+    DEFAULT_SYNC_POOL = NewSyncPool(
+        5, 30000, 2,
+    )
+    return DEFAULT_SYNC_POOL
+}
+
+func Alloc(size int) []int64 {  
+    return DEFAULT_SYNC_POOL.Alloc(size)
+}
+
+func Free(mem []int64) {  
+    DEFAULT_SYNC_POOL.Free(mem)
+}
+
+// SyncPool is a sync.Pool base slab allocation memory pool
+type SyncPool struct {  
+    classes     []sync.Pool
+    classesSize []int
+    minSize     int
+    maxSize     int
+}
+
+func NewSyncPool(minSize, maxSize, factor int) *SyncPool {  
+    n := 0
+    for chunkSize := minSize; chunkSize <= maxSize; chunkSize *= factor {
+        n++
+    }
+    pool := &SyncPool{
+        make([]sync.Pool, n),
+        make([]int, n),
+        minSize, maxSize,
+    }
+    n = 0
+    for chunkSize := minSize; chunkSize <= maxSize; chunkSize *= factor {
+        pool.classesSize[n] = chunkSize
+        pool.classes[n].New = func(size int) func() interface{} {
+            return func() interface{} {
+                buf := make([]int64, size)
+                return &buf
+            }
+        }(chunkSize)
+        n++
+    }
+    return pool
+}
+
+func (pool *SyncPool) Alloc(size int) []int64 {  
+    if size <= pool.maxSize {
+        for i := 0; i < len(pool.classesSize); i++ {
+            if pool.classesSize[i] >= size {
+                mem := pool.classes[i].Get().(*[]int64)
+                // return (*mem)[:size]
+                return (*mem)[:0]
+            }
+        }
+    }
+    return make([]int64, 0, size)
+}
+
+func (pool *SyncPool) Free(mem []int64) {  
+    if size := cap(mem); size <= pool.maxSize {
+        for i := 0; i < len(pool.classesSize); i++ {
+            if pool.classesSize[i] >= size {
+                pool.classes[i].Put(&mem)
+                return
+            }
+        }
+    }
+}
+调用例子:
+attrFilters := cache.Alloc(len(ids))  
+defer cache.Free(attrFilters)  
+重点在Alloc方法。为了能支持变长的slice，这里申请了多个池子，其大小是从5开始，最大到30000，以2为倍数。也就是5、10、20……
+DEFAULT_SYNC_POOL = NewSyncPool(  
+    5,     
+    30000, 
+    2,     
+)
+分配内存的时候， 从池子里面找满足容量切最小的池子。 比如申请长度是2的， 就分配大小为5的那个池子。 如果是11， 就分配大小是20的那个池子里面的对象；
+如果申请的slice很大， 超过了上限30000， 这种情况就不用使池子了， 直接从内存申请；
+当然这些参数可以根据自己实际情况调整；
+和之前的做法有所区别， 把对象重新放回池子是通Free方法实现的.
+结论
+为了优化接口， 前前后后搞了一年。 结果还是不错的。 TPS 提供了最小30%, TP99也降低了很多。
+本篇文章来源 [http://blog.cyeam.com]
+该博客还有介绍如下有趣的内容
+go 工具链 http://blog.cyeam.com/golang/2016/09/27/go-tool-flags
+- Golang 的垃圾回收 http://blog.cyeam.com/golang/2015/07/03/gogc

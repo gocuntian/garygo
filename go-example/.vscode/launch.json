@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "remotePath": "",
+            "port": 2345,
+            "host": "127.0.0.1",
+            "program": "${GOPATH}/src/github.com/xingcuntian/go_test/go-example",
+            "env": {"GOROOT":"/data/golang/go","GOPATH":"/data/go","GOBIN":"/data/go/bin"},
+            "args": [],
+            "showLog": true
+        }
+    ]
+}

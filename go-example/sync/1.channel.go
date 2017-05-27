@@ -1,21 +1,21 @@
 package main
 
 import (
-    "fmt"
-    "time"
+	"fmt"
+	"time"
 )
 
 //无缓冲channel在读和写是都会阻塞
-func Afunction(ch chan int){
-    fmt.Println("finish")
-    time.Sleep(2 * time.Second)
-    <-ch
+func Afunction(ch chan int) {
+	fmt.Println("finish")
+	time.Sleep(2 * time.Second)
+	<-ch
 }
 
-func main(){
-    ch := make(chan int) //初始化无缓冲的channel
-    go Afunction(ch)
-    ch <- 1
+func main() {
+	ch := make(chan int) //初始化无缓冲的channel
+	go Afunction(ch)
+	ch <- 1
 }
 
 //首先创建一个无缓冲channel　ch,　然后执行　go Afuntion(ch),此时执行＜-ch，则Afuntion这个函数便会阻塞，
