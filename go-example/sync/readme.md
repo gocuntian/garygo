@@ -48,3 +48,45 @@ var pool = &sync.Pool{New:func()interface{}{return NewObject()}}
 所以我们需要New function来确保当获取对象对象池为空时，重新生成一个对象返回，
 前者的功能是从池中获取一个interface{}类型的值，
 而后者的作用则是把一个interface{}类型的值放置于池中。
+
+
+
+
+type Map
+
+map是一个具有同时- 常数时间加载，存储和删除的并发映射。 多个goroutines可以同时调用Map的方法是安全的。
+
+零map有效且为空。
+
+首次使用之后，不得复制Map。
+
+type Map struct {
+    // contains filtered or unexported fields
+}
+func (*Map) Delete
+
+func (m *Map) Delete(key interface{})
+删除删除键的值。
+
+func (*Map) Load
+
+func (m *Map) Load(key interface{}) (value interface{}, ok bool)
+Load返回存储在Map中的值，如果不存在值，则返回null。 ok结果表示是否在Map中找到值。
+
+func (*Map) LoadOrStore
+
+func (m *Map) LoadOrStore(key, value interface{}) (actual interface{}, loaded bool)
+LoadOrStore返回键的现有值（如果存在）。 否则，它存储并返回给定的值。 如果加载的值加载结果为真，如果存储则为false。
+func (*Map) Range
+
+func (m *Map) Range(f func(key, value interface{}) bool)
+Range calls f 为每个键顺序调用f和映射中存在的值。 如果f返回false，范围将停止迭代。
+
+不一定对应于Map的内容的任何一致的快照：不会多次访问任何密钥，但如果任何密钥的值被同时存储或删除，则Range可以在Range调用期间的任何点反映该mapping的任何映射。
+Range 可以是O（N）与map中的元素数量，即使f在常数呼叫后返回false。
+
+func (*Map) Store
+
+func (m *Map) Store(key, value interface{})
+存储设置一个键的值。
+
