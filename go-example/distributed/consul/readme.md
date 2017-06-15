@@ -36,3 +36,31 @@ dig @127.0.0.1 -p 8600 a2.node.dc1.consul
 dig @127.0.0.1 -p 8600 a1.node.dc1.consul
 
 
+
+curl -XPUT -d @- 'localhost:8500/v1/acl/create?token=master' <<EOF
+{
+  "Type": "client",
+  "Name": "mytoken",
+  "Rules": "service \"forthservice\" {\n policy = \"write\"\n }\n key \"forthservice/\" {\n policy = \"read\"\n }"
+}
+EOF
+
+$ curl -XPUT -d @- 'localhost:8500/v1/acl/create?token=master' <<EOF
+{
+  "Type": "client",
+  "Name": "mytoken",
+  "Rules": "service \"forthservice\" {\n policy = \"write\"\n }\n key \"forthservice/\" {\n policy = \"read\"\n }"
+}
+EOF
+
+curl '172.16.250.11:8500/v1/kv/?recurse&token=e7b26393-54ac-2681-f248-f55c4a738e7c&pretty'
+
+
+
+https://releases.hashicorp.com/consul-template/
+
+acl_master_token是uuidgen | awk '{print tolower($0)}'生成的，每台主机都不相同
+
+http://nginx.org/download/
+
+
