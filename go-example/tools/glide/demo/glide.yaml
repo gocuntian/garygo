@@ -1,0 +1,4 @@
+package: github.com/xingcuntian/go_test/go-example/tools/glide/demo
+import: 
+- package: github.com/funny/slab
+- package: github.com/funny/utest
