@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Table</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+ 
+        table td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+ 
+        table td:first-child {
+            white-space:nowrap;
+        }
+    </style>
+</head>
+<body>
+<form action="">
+    <table>
+        <tr>
+            <td>username:</td>
+            <td><input type="text"></td>
+        </tr>
+        <tr>
+            <td>password:</td>
+            <td><input type="password"></td>
+        </tr>
+        <tr>
+            <td>sex:</td>
+            <td>
+                <input type="radio" value="0">male
+                <input type="radio" value="1">female
+            </td>
+        </tr>
+        <tr>
+            <td>Hobbies:</td>
+            <td>
+                <input type="checkbox" value="">book
+                <input type="checkbox" value="">play
+                <input type="checkbox" value="">tourism
+            </td>
+        </tr>
+        <tr>
+            <td>Introduction:</td>
+            <td>
+                <textarea name="" id="" cols="30" rows="10"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Submit"></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
