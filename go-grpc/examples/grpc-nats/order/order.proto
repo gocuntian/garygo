@@ -1,0 +1,41 @@
+syntax = "proto3";
+package order;
+
+service OrderService {
+    rpc GetOrders(OrderFilter) returns (stream Order) {}
+    rpc CreateOrder(Order) returns (OrderResponse) {}
+}
+
+message Order {
+    string order_id = 1;
+    string status = 2;
+    int64 create_on = 3;
+    message OrderItem {
+        string code = 1;
+        string name = 2;
+        float unit_price = 3;
+        int32 quantity = 4;
+    }
+    repeated OrderItem order_items = 4;
+}
+
+message OrderResponse {
+    bool is_success = 1;
+    string error = 2;
+}
+
+message OrderFilter {
+    string search_text = 1;
+}
+
+message ServiceDiscovery {
+    string order_service_url = 1;
+}
+
+message EventStore {
+    string aggregate_id = 1;
+    string aggregate_type = 2;
+    string event_id = 3;
+    string event_type = 4;
+    string event_data = 5;
+}
