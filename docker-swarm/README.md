@@ -2,10 +2,15 @@
 ##### http://dockone.io/article/168
 ## docker swarm
  Managers:
+
     -- swarm-00
+
  Workers:
+
     -- swarm-01
+
     -- swarm-02
+    
     -- swarm-03 
 
 ## 创建swarm
