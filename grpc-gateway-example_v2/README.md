@@ -30,8 +30,8 @@
 ##安装 elazarl/go-bindata-assetfs，
 
 ## $ go get github.com/elazarl/go-bindata-assetfs/...
-####默认打开的是一个 http://petstore.swagger.io/v2/swagger.json 的 API 说明信息。我们需要在输入框中输入我们 API 的地址 http://localhost:8080/swagger.json ，然后点击回车键才能看到我们的 API 说明，
-####将文件 third_party/swagger-ui/index.html 中的 http://petstore.swagger.io/v2/swagger.json 替换成 http://localhost:8080/swagger.json ，然后重新生成 pkg/ui/data/swagger/datafile.go 文件，再重新编译一下即可。
+#### 默认打开的是一个 http://petstore.swagger.io/v2/swagger.json 的 API 说明信息。我们需要在输入框中输入我们 API 的地址 http://localhost:8080/swagger.json ，然后点击回车键才能看到我们的 API 说明，
+#### 将文件 third_party/swagger-ui/index.html 中的 http://petstore.swagger.io/v2/swagger.json 替换成 http://localhost:8080/swagger.json ，然后重新生成 pkg/ui/data/swagger/datafile.go 文件，再重新编译一下即可。
 
 ## go get github.com/philips/go-bindata-assetfs
 
