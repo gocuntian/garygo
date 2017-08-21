@@ -165,7 +165,7 @@ window.onload = function() {
   
   // Build a system
   const ui = SwaggerUIBundle({
-    url: "http://petstore.swagger.io/v2/swagger.json",
+    url: "http://localhost:7070/swagger.json",
     dom_id: '#swagger-ui',
     deepLinking: true,
     presets: [
@@ -196,7 +196,7 @@ func third_partySwaggerUiIndexHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "third_party/swagger-ui/index.html", size: 3529, mode: os.FileMode(436), modTime: time.Unix(1502513081, 0)}
+	info := bindataFileInfo{name: "third_party/swagger-ui/index.html", size: 3521, mode: os.FileMode(436), modTime: time.Unix(1503286541, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

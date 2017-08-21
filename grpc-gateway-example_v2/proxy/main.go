@@ -3,15 +3,14 @@ package main
 import (
 	"flag"
 	"io"
+	"mime"
 	"net/http"
 
 	"strings"
 
-	"mime"
-
+	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/philips/go-bindata-assetfs"
 	"github.com/xingcuntian/go_test/grpc-gateway-example_v2/pkg/ui/data/swagger"
 	gw "github.com/xingcuntian/go_test/grpc-gateway-example_v2/protos"
 	"golang.org/x/net/context"
@@ -24,12 +23,13 @@ var (
 
 func serveSwagger(mux *http.ServeMux) {
 	mime.AddExtensionType(".svg", "image/svg+xml")
+
 	fileServer := http.FileServer(&assetfs.AssetFS{
 		Asset:    swagger.Asset,
 		AssetDir: swagger.AssetDir,
 		Prefix:   "third_party/swagger-ui",
 	})
-	prefix := "/swagger-ui"
+	prefix := "/swagger-ui/"
 	mux.Handle(prefix, http.StripPrefix(prefix, fileServer))
 }
 
@@ -38,20 +38,20 @@ func run() error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	swmux := http.NewServeMux()
-	swmux.HandleFunc("/swagger.json", func(w http.ResponseWriter, req *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/swagger.json", func(w http.ResponseWriter, req *http.Request) {
 		io.Copy(w, strings.NewReader(gw.Swagger))
 	})
 
-	mux := runtime.NewServeMux()
+	gwmux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	err := gw.RegisterGreeterHandlerFromEndpoint(ctx, mux, *echoEndpoint, opts)
+	err := gw.RegisterGreeterHandlerFromEndpoint(ctx, gwmux, *echoEndpoint, opts)
 	if err != nil {
 		return err
 	}
-	swmux.Handle("/", mux)
-	serveSwagger(swmux)
-	http.ListenAndServe(":7070", swmux)
+	mux.Handle("/", gwmux)
+	serveSwagger(mux)
+	http.ListenAndServe(":7070", mux)
 	return nil
 }
 
