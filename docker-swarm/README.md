@@ -208,10 +208,66 @@ In addition, --swarm configures the Machine with Swarm, --swarm-master configure
 ### 7.List nodes in the cluster with the following command:
 #### docker run swarm list consul://$(docker-machine ip consul-machine):8500
 
+#### eval $(docker-machine env --swarm swarm-master)
+#### docker network create --driver overlay server-overlay-network
 
-#### curl $(docker-machine ip swarm-master):8080
+#### docker run -p 8080:8080 -d --name=hello-world --net=server-overlay-network dwybourn/hello-world-server
+#### docker run -p 8080:8080 -d --name=hello --net=server-overlay-network dwybourn/hello-server
+#### docker run -p 8080:8080 -d --name=world --net=server-overlay-network dwybourn/world-server
+
 #### curl $(docker-machine ip swarm-node-01):8080
 #### curl $(docker-machine ip swarm-node-02):8080
+
+
+## demo2 
+
+### Create a new virtual machine to run consul.
+
+#### docker-machine create --driver virtualbox --virtualbox-memory 512 consul
+
+### Point Docker commands to the newly created Docker host.
+
+#### eval "$(docker-machine env consul)"
+
+### Pull down and run a consul image.
+
+#### docker run --restart=always -d -p "8500:8500" -h "consul" progrium/consul -server -bootstrap 
+
+### Create the Swarm Master.
+
+#### docker-machine create --driver virtualbox --virtualbox-memory 512 --swarm --swarm-master --swarm-discovery="consul://$(docker-machine ip consul):8500" --engine-opt="cluster-store=consul://$(docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth1:2376" master
+
+### Create three Swarm agents, one for each service.
+
+#### docker-machine create --driver virtualbox --virtualbox-memory 512 --swarm --swarm-discovery="consul://$(docker-machine ip consul):8500" --engine-opt="cluster-store=consul://$(docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth1:2376" node0
+
+#### docker-machine create --driver virtualbox --virtualbox-memory 512 --swarm --swarm-discovery="consul://$(docker-machine ip consul):8500" --engine-opt="cluster-store=consul://$(docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth1:2376" node1
+
+#### docker-machine create --driver virtualbox --virtualbox-memory 512 --swarm --swarm-discovery="consul://$(docker-machine ip consul):8500" --engine-opt="cluster-store=consul://$(docker-machine ip consul):8500" --engine-opt="cluster-advertise=eth1:2376" node2
+
+### Point Docker commands to the swarm master.
+
+#### eval $(docker-machine env --swarm master)
+
+### Create the overlay network. This network is created on the Swarm Master, but is spread to each of the hosts.
+
+#### docker network create --driver overlay server-overlay-network
+
+### STEP 4: RUN THE SERVICES
+
+#### docker run -p 8080:8080 -d --name=hello-world --net=server-overlay-network dwybourn/hello-world-server
+
+#### docker run -p 8080:8080 -d --name=hello --net=server-overlay-network dwybourn/hello-server
+
+#### docker run -p 8080:8080 -d --name=world --net=server-overlay-network dwybourn/world-server
+#### docker ps 
+#### eval $(docker-machine env --swarm master)
+#### eval $(docker-machine env node0)
+#### docker ps
+### STEP 5: TEST IT ALL WORKS
+#### docker run --rm --net=server-overlay-network busybox wget -q -O- http://hello-world:8080
+
+
 
 ## Docker Swarm GUI
 
