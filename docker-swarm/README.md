@@ -215,6 +215,11 @@ In addition, --swarm configures the Machine with Swarm, --swarm-master configure
 #### docker run -p 8080:8080 -d --name=hello --net=server-overlay-network dwybourn/hello-server
 #### docker run -p 8080:8080 -d --name=world --net=server-overlay-network dwybourn/world-server
 
+#### docker run -p 8080:8080 -d --name=golang_hello_world --net=server-overlay-network xingcuntian/http_demo:1.0
+#### docker run -p 8080:8080 -d --name=golang_hello --net=server-overlay-network xingcuntian/http_demo:1.0
+#### docker run -p 8080:8080 -d --name=golang_world --net=server-overlay-network xingcuntian/http_demo:1.0
+
+#### curl $(docker-machine ip swarm-master):8080
 #### curl $(docker-machine ip swarm-node-01):8080
 #### curl $(docker-machine ip swarm-node-02):8080
 
