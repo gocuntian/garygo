@@ -1,4 +1,4 @@
-# docker swarm
+# Docker Swarm
 ##### http://dockone.io/article/168
 ## docker swarm
  Managers:
@@ -10,7 +10,7 @@
     -- swarm-01
 
     -- swarm-02
-    
+
     -- swarm-03 
 
 ## 创建swarm
@@ -104,5 +104,117 @@ OR
 
 此外Swarm模式还提供了服务的滚动升级，将某个worker置为维护模式，及路由网等功能。在Docker将Swarm集成进Docker引擎后，可以使用原生的Docker CLI对容器集群进行各种操作，使集群的部署更加方便、快捷。
 
+## demo 使用
+
+#### docker service create --name wesite --publish 80:80 sixeyed/docker-swarm-walkthrough
+
+#  Docker Machine
+
+    https://docs.docker.com/machine/install-machine/
+
+    curl -L https://github.com/docker/machine/releases/download/v0.12.2/docker-machine-`uname -s`-`uname -m` >/tmp/docker-machine &&
+
+    chmod +x /tmp/docker-machine && sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
+
+#### docker-machine version
+#### docker-machine ls
+#### docker-machine create --driver virtualbox default
+#### docker-machine ls
+ NAME      ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER   ERRORS
+ default   *        virtualbox   Running   tcp://192.168.99.187:2376           v1.9.1
+#### docker-machine env default
+ export DOCKER_TLS_VERIFY="1"
+ export DOCKER_HOST="tcp://172.16.62.130:2376"
+ export DOCKER_CERT_PATH="/Users/<yourusername>/.docker/machine/machines/default"
+ export DOCKER_MACHINE_NAME="default"
+#### eval "$(docker-machine env default)"
+#### docker-machine ip default
+
+#### docker run -d -p 8000:80 nginx
+
+#### curl $(docker-machine ip default):8000 
+#### docker-machine stop default
+#### docker-machine start default
 
 
+ # Run this command to configure your shell:
+ # eval "$(docker-machine env default)"
+
+#### docker-machine rm <machine-name>
+#### docker-machine rm -f $(docker-machine ls -q)
+
+
+
+
+#### $ docker-machine ls
+
+ NAME      ACTIVE   URL          STATE     URL                         SWARM   DOCKER    ERRORS
+ default   *       virtualbox   Running   tcp://192.168.99.100:2376           v1.9.1
+
+#### $ docker run swarm --help
+
+
+
+
+# Demo
+## Docker Swarm Cluster using Consul
+
+https://www.ibm.com/developerworks/cn/opensource/os-cn-consul-docker-swarm/index.html
+
+http://blog.arungupta.me/docker-swarm-cluster-using-consul/
+
+http://blog.scottlogic.com/2016/06/17/docker-swarm.html
+
+
+## Create Consul Discovery Service
+### 1.Create a Machine that will host discovery service:
+#### docker-machine create -d=virtualbox consul-machine
+
+### 2.Connect to this Machine:
+#### eval $(docker-machine env consul-machine)
+
+### 3.Run Consul service using the following Compose file:
+#### docker-compose up -d
+
+#### docker ps
+
+## Create Docker Swarm Cluster using Consul
+### 1.Create a Swarm Master using the Consul discovery service:
+#### docker-machine create -d virtualbox --swarm --swarm-master --swarm-discovery="consul://$(docker-machine ip consul-machine):8500" --engine-opt="cluster-store=consul://$(docker-machine ip consul-machine):8500" --engine-opt="cluster-advertise=eth1:2376" swarm-master
+#### Three options to look here:
+--swarm-discovery defines address of the discovery service
+--cluster-advertise advertise the machine on the network
+--cluster-store designate a distributed k/v storage backend for the cluster
+In addition, --swarm configures the Machine with Swarm, --swarm-master configures the created Machine to be Swarm master.
+
+### 2.Connect to this newly created master and find some information about it:
+#### eval "$(docker-machine env swarm-master)"
+#### docker info
+
+### 3.Create a new Machine to be part of this Swarm cluster:
+#### docker-machine create -d virtualbox --swarm --swarm-discovery="consul://$(docker-machine ip consul-machine):8500" --engine-opt="cluster-store=consul://$(docker-machine ip consul-machine):8500" --engine-opt="cluster-advertise=eth1:2376" swarm-node-01
+#### Machine talks to the Discovery Service using --swarm-discovery.
+
+### 4.Create a second node in this cluster:
+#### docker-machine create -d virtualbox --swarm --swarm-discovery="consul://$(docker-machine ip consul-machine):8500" --engine-opt="cluster-store=consul://$(docker-machine ip consul-machine):8500" --engine-opt="cluster-advertise=eth1:2376" swarm-node-02
+
+### 5.List all the created Machines:
+#### docker-machine ls
+
+### 6.Connect to the Swarm cluster and find some information about it:
+#### eval "$(docker-machine env --swarm swarm-master)"
+#### docker info
+
+### 7.List nodes in the cluster with the following command:
+#### docker run swarm list consul://$(docker-machine ip consul-machine):8500
+
+
+#### curl $(docker-machine ip swarm-master):8080
+#### curl $(docker-machine ip swarm-node-01):8080
+#### curl $(docker-machine ip swarm-node-02):8080
+
+## Docker Swarm GUI
+
+#### docker run -it --rm -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock  julienbreux/docker-swarm-gui:latest
+
+https://github.com/thehivecorporation/docker-commander
