@@ -69,13 +69,13 @@ ID                            HOSTNAME            STATUS              AVAILABILI
 OR
 
 #### docker service create --name ping00 alpine ping docker-swarm-00
+#### docker service create --name world -p 8080:8080 xingcuntian/http_demo:1.0
 ### 参数说明：
 
     --replicas参数指定服务由几个实例组成。最后的命令行参数alpine ping docker.com指定了使用alpine镜像创建服务，实例启动时运行ping docker.com命令。这与docker run命令是一样的。
 使用docker service ls查看正在运行服务的列表：
 
 #### docker service ls
-#### docker service tasks ping00
 
 
 ### 查询Swarm中服务的信息
@@ -277,5 +277,10 @@ In addition, --swarm configures the Machine with Swarm, --swarm-master configure
 ## Docker Swarm GUI
 
 #### docker run -it --rm -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock  julienbreux/docker-swarm-gui:latest
-
+#### docker run -it --rm -p 5080:8080 -v /var/run/docker.sock:/var/run/docker.sock  julienbreux/docker-swarm-gui:latest
 https://github.com/thehivecorporation/docker-commander
+https://github.com/jfdamy/SwarmUI
+
+
+## 其他
+https://coreos.com/etcd/docs/latest/getting-started-with-etcd.html
