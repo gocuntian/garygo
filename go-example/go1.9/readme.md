@@ -48,13 +48,13 @@ type alias
 主要在于垃圾回收器的优化、更好的生成的代码以及核心库的优化。
 
 #  Go语言 | Go 1.9 新特性 Type Alias详解
-type alias这个特性的主要目的是用于已经定义的类型，在package之间的移动时的兼容。比如我们有一个导出的类型flysnow.org/lib/T1，现在要迁移到另外一个package中, 比如flysnow.org/lib2/T1中。
+type alias这个特性的主要目的是用于已经定义的类型，在package之间的移动时的兼容。比如我们有一个导出的类型github.com/lib/T1，现在要迁移到另外一个package中, 比如github.com/lib2/T1中。
 
 没有type alias的时候我们这么做，就会导致其他第三方引用旧的package路径的代码，都要统一修改，不然无法使用。
 
 有了type alias就不一样了，类型T1的实现我们可以迁移到lib2下，同时我们在原来的lib下定义一个lib2下T1的别名，这样第三方的引用就可以不用修改，也可以正常使用，只需要兼容一段时间，再彻底的去掉旧的package里的类型兼容，这样就可以渐进式的重构我们的代码，而不是一刀切。
 
-//package:flysnow.org/lib
+//package:github.com/lib
 type T1=lib2.T1
 type alias vs defintion
 
@@ -113,8 +113,7 @@ func (i MyUser1) m1(){
 func (i MyUser2) m2(){
     fmt.Println("MyUser2.m2")
 }
-//Blog:www.flysnow.org
-//Wechat:flysnow_org
+
 func main() {
     var i1 MyUser1    
     var i2 MyUser2
@@ -177,8 +176,7 @@ func (i MyInt) m(){
 }
 定义了一个接口I，MyI1是基于I的新类型；MyI2是I的类型别名；MyInt实现了接口I。下面进行测试。
 
-//Blog:www.flysnow.org
-//Wechat:flysnow_org
+
 func main() {
     //赋值实现类型MyInt
     var i I = MyInt(0)    
@@ -199,8 +197,7 @@ func main() {
 
 我们都知道type alias的两个类型是等价的，但是他们在类型嵌套时有些不一样。
 
-//Blog:www.flysnow.org
-//Wechat:flysnow_org
+
 func main() {
     my:=MyStruct{}
     my.T2.m1()
@@ -221,8 +218,7 @@ type MyStruct struct {
 
 当然我们可以把T1,T2同时嵌入到MyStrut中，进行分别调用。
 
-//Blog:www.flysnow.org
-//Wechat:flysnow_org
+
 func main() {
     my:=MyStruct{}
     my.T2.m1()
@@ -236,8 +232,7 @@ type MyStruct struct {
 
 下面我们做个有趣的实验，把main方法的代码改为如下：
 
-//Blog:www.flysnow.org
-//Wechat:flysnow_org
+
 func main() {
     my:=MyStruct{}
     my.m1()
@@ -277,8 +272,6 @@ type alias还有一个功能，可以导出一个未被导出的类型。
 
 package lib
 
-//Blog:www.flysnow.org
-//Wechat:flysnow_org
 type user struct {
     name string
     Email string
@@ -289,6 +282,7 @@ func (u user) getName() string {
 func (u user) GetEmail() string {
     return u.Email
 }
+
 //把这个user导出为User
 type User = user
 user本身是一个未导出的类型，不能被其他package访问，但是我们可以通过type User = user，定义一个User，这样这个User就可以被其他package访问了，可以使用user类型导出的字段和方法，示例中是Email字段和GetEmail方法，另外未被导出name字段和getName方法是不能被其他package使用的。
