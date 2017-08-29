@@ -55,20 +55,26 @@ type alias这个特性的主要目的是用于已经定义的类型，在package
 有了type alias就不一样了，类型T1的实现我们可以迁移到lib2下，同时我们在原来的lib下定义一个lib2下T1的别名，这样第三方的引用就可以不用修改，也可以正常使用，只需要兼容一段时间，再彻底的去掉旧的package里的类型兼容，这样就可以渐进式的重构我们的代码，而不是一刀切。
 
 //package:github.com/lib
+
 type T1=lib2.T1
+
 type alias vs defintion
 
 我们基于一个类型创建一个新类型，称之为defintion；基于一个类型创建一个别名，称之为alias，这就是他们最大的区别。
 
 type MyInt1 int
+
 type MyInt2 = int
 
 
 第一行代码是基于基本类型int创建了新类型MyInt1，第二行是创建的一个int的类型别名MyInt2，注意类型别名的定义是=。
 
 var i int =0
+
 var i1 MyInt1 = i //error
+
 var i2 MyInt2 = i
+
 fmt.Println(i1,i2)
 
 
@@ -117,6 +123,7 @@ type User struct {
 
 }
 type MyUser1 User
+
 type MyUser2 = User
 
 func (i MyUser1) m1(){
@@ -270,6 +277,7 @@ func main() {
 type alias的声明，一定要留意类型循环，不要产生了循环，一旦产生，就会编译不通过，那么什么是类型循环呢。假如type T2 = T1,那么T1绝对不能直接、或者间接的引用到T2，一旦有，就会类型循环。
 
 type T2 = *T2
+
 type T2 = MyStruct
 
 type MyStruct struct {
