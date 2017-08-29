@@ -62,12 +62,16 @@ type alias vs defintion
 
 type MyInt1 int
 type MyInt2 = int
+
+
 第一行代码是基于基本类型int创建了新类型MyInt1，第二行是创建的一个int的类型别名MyInt2，注意类型别名的定义是=。
 
 var i int =0
 var i1 MyInt1 = i //error
 var i2 MyInt2 = i
 fmt.Println(i1,i2)
+
+
 仔细看这个示例，第二行把一个int类型的变量i,赋值给MyInt1类型的变量i1会被提示编译错误：类型无法转换。但是第三行把int类型的变量i,赋值给MyInt2类型的变量i2就可以，不会提示错误。
 
 从这个例子也可以看出来，这两种定义方式的不同，因为Go是强类型语言，所以类型之间的转换必须强制转换，因为int和MyInt1是不同的类型，所以这里会报编译错误。
@@ -79,20 +83,28 @@ fmt.Println(i1,i2)
 每个类型都可以通过接受者的方式，添加属于它自己的方法，我们看下通过type alias的类型是否可以，以及拥有哪些方法。
 
 type MyInt1 int
+
 type MyInt2 = int
 
 func (i MyInt1) m1(){
+
     fmt.Println("MyInt1.m1")
 }
+
+
 func (i MyInt2) m2(){
     fmt.Println("MyInt2.m2")
 }
+
 func main() {
     var i1 MyInt1    
     var i2 MyInt2
     i1.m1()
     i2.m2()
 }
+
+
+
 以上示例代码看着是没有任何问题，但是我们编译的时候会提示：
 
 i2.m2 undefined (type int has no field or method m2)
@@ -120,6 +132,7 @@ func main() {
     i1.m1()
     i2.m2()
 }
+
 换成struct，正常运行。所以本地定义的类型的别名，还是可以为其添加方法的。现在我们接着上面的例子，看一个有趣的现象，我在main函数里增加如下代码：
 
     var i User
@@ -160,6 +173,7 @@ func main() {
 
     fmt.Println(i1,i2)
 }
+
 定义了一个接口I，从代码上看，只有MyUser2实现了它，但是我们代码的演示中，发现User也实现了接口I，所以这就验证了我们的推到是正确的，返回来如果User实现了某个接口，那么它的type alias也同样会实现这个接口。
 
 以上讲了很多示例都是类型struct的别名，我们看下接口interface的type alias是否也是等价的。
@@ -174,6 +188,7 @@ type MyInt int
 func (i MyInt) m(){
     fmt.Println("MyInt.m")
 }
+
 定义了一个接口I，MyI1是基于I的新类型；MyI2是I的类型别名；MyInt实现了接口I。下面进行测试。
 
 
@@ -212,6 +227,7 @@ type T2 = T1
 type MyStruct struct {
     T2
 }
+
 示例中T2是T1的别名，但是我们把T2嵌套在MyStruct中，在调用的时候只能通过T2这个名称调用，而不能通过T1，会提示没这个字段的。反过来也一样。
 
 这是因为T1,T2是两个名称，虽然他们等价，但他们是具有两个不同名字的等价类型，所以在类型嵌套的时候，就是两个字段。
@@ -228,6 +244,7 @@ type MyStruct struct {
     T2
     T1
 }
+
 以上也是可以正常运行的，证明这是具有两个不同名字的，同种类型的字段。
 
 下面我们做个有趣的实验，把main方法的代码改为如下：
@@ -237,6 +254,7 @@ func main() {
     my:=MyStruct{}
     my.m1()
 }
+
 猜猜是不是可以正常编译运行呢？答应可能出乎意料，是不能正常编译的，提示如下：
 
 ./main.go:25:4: ambiguous selector my.m1
@@ -252,6 +270,7 @@ type MyStruct struct {
     T1
     T2
 }
+
 以上两种定义都是类型循环，我们自己在使用的过程中，要避免这种定义的出现。
 
 byte and rune
@@ -260,11 +279,13 @@ byte and rune
 
 type byte bytet
 ype rune rune
+
+
 现在Go 1.9有了type alias这个新特性后，他们的定义就变成如下了：
 
 type byte = uint8
 type rune = int32
-恩，非常很省事和简洁。
+
 
 导出未导出的类型
 
@@ -276,13 +297,17 @@ type user struct {
     name string
     Email string
 }
+
 func (u user) getName() string {
     return u.name
 }
+
 func (u user) GetEmail() string {
     return u.Email
 }
 
 //把这个user导出为User
+
 type User = user
+
 user本身是一个未导出的类型，不能被其他package访问，但是我们可以通过type User = user，定义一个User，这样这个User就可以被其他package访问了，可以使用user类型导出的字段和方法，示例中是Email字段和GetEmail方法，另外未被导出name字段和getName方法是不能被其他package使用的。
