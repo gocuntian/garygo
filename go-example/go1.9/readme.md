@@ -217,13 +217,17 @@ func main() {
     my:=MyStruct{}
     my.T2.m1()
 }
+
 type T1 struct {
 
 }
+
 func (t T1) m1(){
     fmt.Println("T1.m1")
 }
+
 type T2 = T1
+
 type MyStruct struct {
     T2
 }
@@ -240,6 +244,7 @@ func main() {
     my.T2.m1()
     my.T1.m1()
 }
+
 type MyStruct struct {
     T2
     T1
@@ -266,6 +271,7 @@ type alias的声明，一定要留意类型循环，不要产生了循环，一�
 
 type T2 = *T2
 type T2 = MyStruct
+
 type MyStruct struct {
     T1
     T2
@@ -278,12 +284,14 @@ byte and rune
 这两个类型一个是int8的别名，一个是int32的别名，在Go 1.9之前，他们是这么定义的。
 
 type byte bytet
-ype rune rune
+
+type rune rune
 
 
 现在Go 1.9有了type alias这个新特性后，他们的定义就变成如下了：
 
 type byte = uint8
+
 type rune = int32
 
 
