@@ -13,4 +13,5 @@ all:
 		-I${GOPATH}/src \
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 		--swagger_out=logtostderr=true:. \
-		service.proto	
+		service.proto
+	go generate .	
